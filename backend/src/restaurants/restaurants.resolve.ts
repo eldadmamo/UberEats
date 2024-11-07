@@ -16,7 +16,7 @@ export class RestaurantsResolver {
     createRestaurant(
         @Args() CreateRestaurantDto: CreateRestaurantDto
     ): boolean {
-        console.log(CreateRestaurantDto)
+        console.log(    )
         return true;
     }
 
