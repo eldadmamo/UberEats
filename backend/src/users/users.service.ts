@@ -29,7 +29,7 @@ export class UsersService {
         await this.users.save(this.users.create({email,password,role}));
         return {ok:true};
     }
-    catch(e) { 
+    catch(error) { 
         return {ok:false,error: "Couldn't create account"};
     }
 }
