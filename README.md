@@ -1,7 +1,3 @@
-Here's a professional README template for your UberEats project. This README outlines the project's purpose, tech stack, and setup instructions.
-
----
-
 # UberEats
 
 UberEats is a food delivery service platform inspired by the original UberEats. This project consists of a backend server built with **NestJS**, **PostgreSQL**, and **GraphQL**, while the frontend is developed using **ReactJS**. This platform allows users to browse restaurants, place orders, and track delivery status in real-time.
