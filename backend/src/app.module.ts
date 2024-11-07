@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
 
 @Module({
   imports: [
@@ -36,8 +37,9 @@ import { ConfigModule } from '@nestjs/config';
       username: "postgres",
       password: "123456",
       database: process.env.DB_NAME,
-      synchronize: true,
-      logging: true 
+      synchronize: process.env.NODE_ENV !== "prod",
+      logging: process.env.NODE_ENV !== "prod",
+      entities:[Restaurant]
     }),
     RestaurantsModule,
     
