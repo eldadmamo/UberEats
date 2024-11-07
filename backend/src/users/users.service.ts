@@ -6,14 +6,16 @@ import { Repository } from 'typeorm';
 import { createAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from 'src/jwt/jwt.service';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User) private readonly users:Repository<User>,
-        private readonly config: ConfigService
+        private readonly config: ConfigService,
+        private readonly jwtServices: JwtService
     ){
-        console.log(this.config.get('SECRET_KEY'))
+        this.jwtServices.hello();
     }
 
    async createAccount({email, password, role}: createAccountInput): Promise<{ok:boolean , error?: string}>{
