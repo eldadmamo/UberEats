@@ -12,10 +12,9 @@ import { JwtService } from 'src/jwt/jwt.service';
 export class UsersService {
     constructor(
         @InjectRepository(User) private readonly users:Repository<User>,
-        private readonly config: ConfigService,
         private readonly jwtServices: JwtService
     ){
-        this.jwtServices.hello();
+        
     }
 
    async createAccount({email, password, role}: createAccountInput): Promise<{ok:boolean , error?: string}>{
@@ -55,7 +54,7 @@ export class UsersService {
                     error: "Wrong Password"
                 }
             }
-            const token = jwt.sign({id:user.id}, this.config.get('SECRET_KEY'))
+            const token = this.jwtServices.sign(user.id)
             return {
                 ok:true,
                 token
