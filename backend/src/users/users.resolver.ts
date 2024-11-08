@@ -22,7 +22,7 @@ export class UsersResolver {
 
     @Mutation(()  => CreateAccountOutput)
     async createAccount(@Args("input") createAccountInput: createAccountInput)
-    :Promise<CreateAccountOutput>{
+    :Promise <CreateAccountOutput>{
         try{
             return this.userService.createAccount(createAccountInput);
         }
@@ -58,7 +58,7 @@ export class UsersResolver {
 
     @UseGuards(AuthGuard)
     @Query(() => UserProfileOutput)
-   async userProfile(@Args() userProfileInput: UserProfileInput): Promise<UserProfileOutput> {
+    async userProfile(@Args() userProfileInput: UserProfileInput): Promise<UserProfileOutput> {
         try{
             const user = await this.userService.findById(userProfileInput.userId);
             if(!user){
@@ -95,7 +95,9 @@ export class UsersResolver {
     }
 
     @Mutation(() => VerifyEmailOutput)
-    verifyEmail(@Args('input') {code}: VerifyEmailInput){
-        this.userService.verifyEmail(code);
+    async verifyEmail(@Args('input') {code}: VerifyEmailInput):Promise<VerifyEmailOutput>{
+    
+          return await this.userService.verifyEmail(code);
+           
     }
 }

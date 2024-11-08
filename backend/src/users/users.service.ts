@@ -10,6 +10,7 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
 import { locatedError } from 'graphql';
+import { VerifyEmailOutput } from './dtos/verify-email.dto';
 
 @Injectable()
 export class UsersService {
@@ -47,9 +48,9 @@ export class UsersService {
     async login({email,password}:LoginInput):Promise<{ok:boolean; error?:string; token?: string}> {
         try{
             const user = await this.users.findOne({
-                where:{
-                    email
-        }})
+                where:{email},
+                select:["id","password"]
+    })
             if(!user){
                 return {
                     ok:false,
@@ -63,7 +64,8 @@ export class UsersService {
                     error: "Wrong Password"
                 }
             }
-            const token = this.jwtServices.sign(user.id)
+            console.log(user);
+            const token = this.jwtServices.sign(user.id);
             return {
                 ok:true,
                 token
@@ -106,17 +108,23 @@ export class UsersService {
         return this.users.save(user);
     }
 
-    async verifyEmail(code:string): Promise<boolean>{
-        const verification = await this.verifications.findOne({
-            where: { code },
-            relations: ['user'],
-        });
-        if(verification){
-            verification.user.verified = true;
-            console.log(verification.user)
-            this.users.save(verification.user);
+    async verifyEmail(code:string): Promise<VerifyEmailOutput>{
+        try{
+            const verification = await this.verifications.findOne({
+                where: { code },
+                relations: ['user'],
+            });
+            if(verification){
+                verification.user.verified = true;
+                await this.users.save(verification.user);
+                await this.verifications.delete(verification.id);
+                return {ok:true};
+            }
+            return {ok:false, error: 'Verification not found'}
         }
-        return false;
+        catch(error){
+            return {ok: false, error};
+        }
     }
 
 }
