@@ -1,8 +1,12 @@
-import { Resolver,Query, Mutation, Args, Field } from '@nestjs/graphql';
+import { Resolver,Query, Mutation, Args, Field, Context } from '@nestjs/graphql';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { createAccountInput, CreateAccountOutput } from './dtos/create-account.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { UserProfileInput, UserProfileOutput } from 'src/users/dtos/user-profile.dto';
 
 
 @Resolver(() => User)
@@ -43,8 +47,31 @@ export class UsersResolver {
     }
 
     @Query(() => User)
-    me(){
-        
+    @UseGuards(AuthGuard)
+    me(
+        @AuthUser() authUser: User
+    ){
+        return authUser;
     }
 
+    @UseGuards(AuthGuard)
+    @Query(() => UserProfileOutput)
+   async userProfile(@Args() userProfileInput: UserProfileInput): Promise<UserProfileOutput> {
+        try{
+            const user = await this.userService.findById(userProfileInput.userId);
+            if(!user){
+                throw Error()
+            }
+            return {
+                ok: true,
+                user,  
+            }
+        } catch(e){
+            return {
+                error: "User not Found",
+                ok: false
+            }
+        }
+        
+    }
 }
