@@ -11,6 +11,7 @@ import { EditProfileInput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
 import { locatedError } from 'graphql';
 import { VerifyEmailOutput } from './dtos/verify-email.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +19,8 @@ export class UsersService {
         @InjectRepository(User) private readonly users:Repository<User>,
         @InjectRepository(Verification) 
         private readonly verifications:Repository<Verification>,
-        private readonly jwtServices: JwtService
+        private readonly jwtServices: JwtService,
+        private readonly mailService: MailService,
     ){
         
     }
@@ -34,10 +36,11 @@ export class UsersService {
            return {ok: false, error: "There is a user with that email already"};
         }
         const user = await this.users.save(this.users.create({email,password,role}));
-        await this.verifications.save(
+        const verification = await this.verifications.save(
             this.verifications.create({
             user
         }))
+        this.mailService.sendVerificationEmail(user.email, verification.code)
         return {ok:true};
     }
     catch(error) { 
@@ -98,9 +101,10 @@ export class UsersService {
         if(email){
             user.email = email;
             user.verified = false;
-            await this.verifications.save(
+            const verification = await this.verifications.save(
                 this.verifications.create({user})
             )
+            this.mailService.sendVerificationEmail(user.email, verification.code)
         }
         if(password){
             user.password = password;
