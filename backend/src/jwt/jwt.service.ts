@@ -7,7 +7,9 @@ import { CONFIG_OPTIONS } from 'src/common/common.constant';
 export class JwtService {
     constructor(
         @Inject(CONFIG_OPTIONS) private readonly options: JwtModuleOptions
-    ){}
+    ){
+        
+    }
     sign(userId: number): string{
         console.log(userId);
        return jwt.sign({id:userId}, this.options.privateKey);
