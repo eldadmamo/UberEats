@@ -31,7 +31,7 @@ export class UsersService {
             where:{
                 email
             }
-        })
+        });
         if(exists){
            return {ok: false, error: "There is a user with that email already"};
         }
@@ -82,7 +82,7 @@ export class UsersService {
     }
 
     async findById(id:number):Promise<User>{
-        return this.users.findOne({
+        return this.users.findOneOrFail({
             where:{
                 id
             }
