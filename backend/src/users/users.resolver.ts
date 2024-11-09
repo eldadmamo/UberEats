@@ -64,10 +64,7 @@ export class UsersResolver {
             if(!user){
                 throw Error()
             }
-            return {
-                ok: true,
-                user,  
-            }
+           
         } catch(e){
             return {
                 error: "User not Found",

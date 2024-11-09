@@ -3,15 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import * as jwt from "jsonwebtoken";
 import { Repository } from 'typeorm';
-import { createAccountInput } from './dtos/create-account.dto';
-import { LoginInput } from './dtos/login.dto';
+import { createAccountInput, CreateAccountOutput } from './dtos/create-account.dto';
+import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
-import { EditProfileInput } from './dtos/edit-profile.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
 import { locatedError } from 'graphql';
 import { VerifyEmailOutput } from './dtos/verify-email.dto';
 import { MailService } from 'src/mail/mail.service';
+import { UserProfileOutput } from './dtos/user-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -25,91 +26,110 @@ export class UsersService {
         
     }
 
-   async createAccount({email, password, role}: createAccountInput): Promise<{ok:boolean , error?: string}>{
-    try{
-        const exists = await this.users.findOne({
-            where:{
-                email
-            }
-        });
-        if(exists){
-           return {ok: false, error: "There is a user with that email already"};
-        }
-        const user = await this.users.save(this.users.create({email,password,role}));
-        const verification = await this.verifications.save(
+    async createAccount({
+        email,
+        password,
+        role,
+      }: createAccountInput): Promise<CreateAccountOutput> {
+        try {
+          const exists = await this.users.findOne({ where:{email} });
+          if (exists) {
+            return { ok: false, error: 'There is a user with that email already' };
+          }
+          const user = await this.users.save(
+            this.users.create({ email, password, role }),
+          );
+          const verification = await this.verifications.save(
             this.verifications.create({
-            user
-        }))
-        this.mailService.sendVerificationEmail(user.email, verification.code)
-        return {ok:true};
-    }
-    catch(error) { 
-        return {ok:false,error: "Couldn't create account"};
-    }
-}
- 
-    async login({email,password}:LoginInput):Promise<{ok:boolean; error?:string; token?: string}> {
-        try{
-            const user = await this.users.findOne({
-                where:{email},
-                select:["id","password"]
-    })
-            if(!user){
-                return {
-                    ok:false,
-                    error: 'User not found'
-                }
-            }
-            const passwordCorrect = await user.checkPassword(password);
-            if(!passwordCorrect){
-                return {
-                    ok:false,
-                    error: "Wrong Password"
-                }
-            }
-            console.log(user);
-            const token = this.jwtServices.sign(user.id);
-            return {
-                ok:true,
-                token
-            }
-        }   catch(error){
-            return {
-                ok:false,
-                error,
-            }
+              user,
+            }),
+          );
+          this.mailService.sendVerificationEmail(user.email, verification.code);
+          return { ok: true };
+        } catch (e) {
+          return { ok: false, error: "Couldn't create account" };
         }
-    }
+      }
+ 
+async login({ email, password }: LoginInput): Promise<LoginOutput> {
+    try {
+      const user = await this.users.findOne({
+         where:{email },
+        select: ['id', 'password'] ,
+      }
+        
+      );
+      if (!user) {
+        return {
+          ok: false,
+          error: 'User not found',
+        };
+      }
+      const passwordCorrect = await user.checkPassword(password);
+      if (!passwordCorrect) {
+        return {
+          ok: false,
+          error: 'Wrong password',
+        };
+      }
 
-    async findById(id:number):Promise<User>{
-        return this.users.findOneOrFail({
-            where:{
-                id
-            }
-        })
+      const token = this.jwtServices.sign(user.id);
+      return {
+        ok: true,
+        token,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: "Can't log user in.",
+      };
     }
+  }
+
+    
+
+    async findById(id: number): Promise<UserProfileOutput> {
+        try {
+          const user = await this.users.findOneOrFail({ where:{id} });
+          return {
+            ok: true,
+            user,
+          };
+        } catch (error) {
+          return { ok: false, error: 'User Not Found' };
+        }
+      }
 
     async editProfile(
         userId: number, 
         {email, password}: EditProfileInput
-    ): Promise<User> {
-        const user = await this.users.findOne({
-            where:{
-                id: userId
+    ): Promise<EditProfileOutput> {
+        try{
+            const user = await this.users.findOne({
+                where:{
+                    id: userId
+                }
+            });
+            if(email){
+                user.email = email;
+                user.verified = false;
+                const verification = await this.verifications.save(
+                    this.verifications.create({ user })
+                )
+                this.mailService.sendVerificationEmail(user.email, verification.code)
             }
-        });
-        if(email){
-            user.email = email;
-            user.verified = false;
-            const verification = await this.verifications.save(
-                this.verifications.create({user})
-            )
-            this.mailService.sendVerificationEmail(user.email, verification.code)
+            if(password){
+                user.password = password;
+            }
+            await this.users.save(user);
+            return {
+                ok:true
+            }
+        } catch(error){
+            return {ok:false, error: 'Could not update profile.'}
         }
-        if(password){
-            user.password = password;
-        }
-        return this.users.save(user);
+        
+        
     }
 
     async verifyEmail(code:string): Promise<VerifyEmailOutput>{
