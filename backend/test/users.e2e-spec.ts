@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { getConnection, Repository } from 'typeorm';
+import { DataSource, getConnection, Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Verification } from 'src/users/entities/verification.entity';
@@ -16,12 +16,13 @@ jest.mock('got', () => {
 const GRAPHQL_ENDPOINT = '/graphql';
 
 const testUser = {
-  email: 'eldadf456@gmail.com',
+  email: 'aben@gmail.com ',
   password: '654321654321',
 };
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
+  let dataSource: DataSource;
   let usersRepository: Repository<User>;
   let verificationsRepository: Repository<Verification>;
   let jwtToken: string;
@@ -33,21 +34,20 @@ describe('UserModule (e2e)', () => {
       .set('X-JWT', jwtToken)
       .send({ query });
 
-  beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = module.createNestApplication();
-    usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    verificationsRepository = module.get<Repository<Verification>>(
-      getRepositoryToken(Verification),
-    );
-    await app.init();
-  });
+      beforeAll(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+          imports: [AppModule],
+        }).compile();
+        app = module.createNestApplication();
+        dataSource = module.get<DataSource>(DataSource);
+        usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
+        verificationsRepository = module.get<Repository<Verification>>(getRepositoryToken(Verification));
+        await app.init();
+      });
 
   afterAll(async () => {
-    await getConnection().dropDatabase();
-    app.close();
+    await dataSource.dropDatabase();
+    await app.close();
   });
 
   describe('createAccount', () => {
@@ -192,7 +192,7 @@ describe('UserModule (e2e)', () => {
     it('should not find a profile', () => {
       return privateTest(`
           {
-            userProfile(userId:666){
+            userProfile(userId:1){
               ok
               error
               user {

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import * as jwt from "jsonwebtoken";
 import { Repository } from 'typeorm';
-import { createAccountInput, CreateAccountOutput } from './dtos/create-account.dto';
+import { CreateAccountInput, CreateAccountOutput } from './dtos/create-account.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
@@ -30,7 +30,7 @@ export class UsersService {
         email,
         password,
         role,
-      }: createAccountInput): Promise<CreateAccountOutput> {
+      }: CreateAccountInput): Promise<CreateAccountOutput> {
         try {
           const exists = await this.users.findOne({ where:{email} });
           if (exists) {
@@ -44,9 +44,10 @@ export class UsersService {
               user,
             }),
           );
-          this.mailService.sendVerificationEmail(user.email, verification.code);
+          await this.mailService.sendVerificationEmail(user.email, verification.code);
           return { ok: true };
         } catch (e) {
+          console.error('Error in createAccount:', e);
           return { ok: false, error: "Couldn't create account" };
         }
       }
@@ -73,12 +74,13 @@ async login({ email, password }: LoginInput): Promise<LoginOutput> {
         };
       }
 
-      const token = this.jwtServices.sign(user.id);
+      const token = await this.jwtServices.sign(user.id);
       return {
         ok: true,
         token,
       };
     } catch (error) {
+      console.error('Error in login:', error);
       return {
         ok: false,
         error: "Can't log user in.",
@@ -96,6 +98,7 @@ async login({ email, password }: LoginInput): Promise<LoginOutput> {
             user,
           };
         } catch (error) {
+          console.error('Error in findById:', error);
           return { ok: false, error: 'User Not Found' };
         }
       }
@@ -126,6 +129,7 @@ async login({ email, password }: LoginInput): Promise<LoginOutput> {
                 ok:true
             }
         } catch(error){
+          console.error('Error in editProfile:', error);
             return {ok:false, error: 'Could not update profile.'}
         }
         
@@ -147,6 +151,7 @@ async login({ email, password }: LoginInput): Promise<LoginOutput> {
             return {ok:false, error: 'Verification not found'}
         }
         catch(error){
+          console.error('Error in verifyEmail:', error);
             return {ok: false, error};
         }
     }
