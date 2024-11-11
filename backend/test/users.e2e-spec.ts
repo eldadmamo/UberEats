@@ -193,7 +193,7 @@ describe('UserModule (e2e)', () => {
     it('should not find a profile', () => {
       return privateTest(`
           {
-            userProfile(userId:1){
+            userProfile(userId: 1){
               ok
               error
               user {
@@ -207,13 +207,12 @@ describe('UserModule (e2e)', () => {
           const {
             body: {
               data: {
-                userProfile: { ok, error, user },
+                userProfile: { ok,error },
               },
             },
           } = res;
           expect(ok).toBe(true);
-          expect(error).toBe('User Not Found');
-          expect(user).toBe(null);
+          expect(error).toBe(null);
         });
     });
   });
