@@ -9,16 +9,15 @@ import { JwtModule } from './jwt/jwt.module';
 import { AuthModule } from './auth/auth.module';
 import { Verification } from './users/entities/verification.entity';
 import { MailModule } from './mail/mail.module';
-import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { DataSource } from 'typeorm';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
-      ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
           .valid('dev', 'production', 'test')
@@ -43,8 +42,8 @@ import { DataSource } from 'typeorm';
             : {
                 host: process.env.DB_HOST,
                 port: +process.env.DB_PORT,
-                username: process.env.DB_USERNAME,
-                password: process.env.DB_PASSWORD,
+                username: "postgres",
+                password: "123456",
                 database: process.env.DB_NAME,
               }),
           synchronize: process.env.NODE_ENV !== 'prod',
@@ -52,8 +51,8 @@ import { DataSource } from 'typeorm';
             process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
           entities: [
             User,
-            Verification,
-            Restaurant,
+            Verification
+            
           ],
         } as TypeOrmModuleOptions),
     }),

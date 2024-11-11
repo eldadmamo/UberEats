@@ -3,9 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 
 const mockRepository = () => ({
   findOne: jest.fn(),
@@ -27,7 +27,7 @@ const mockMailService = () => ({
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
 describe('UserService', () => {
-  let service: UsersService;
+  let service: UserService;
   let usersRepository: MockRepository<User>;
   let verificationsRepository: MockRepository<Verification>;
   let mailService: MailService;
@@ -36,7 +36,7 @@ describe('UserService', () => {
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UserService,
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository(),
@@ -55,7 +55,7 @@ describe('UserService', () => {
         },
       ],
     }).compile();
-    service = module.get<UsersService>(UsersService);
+    service = module.get<UserService>(UserService);
     mailService = module.get<MailService>(MailService);
     jwtService = module.get<JwtService>(JwtService);
     usersRepository = module.get(getRepositoryToken(User));
@@ -71,7 +71,7 @@ describe('UserService', () => {
     const createAccountArgs = {
       email: 'eldadf456@gmail.com',
       password: '654321654321',
-      role: 0,
+      role: UserRole.Client,
     };
 
     it('should fail if user exists', async () => {

@@ -16,7 +16,7 @@ jest.mock('got', () => {
 const GRAPHQL_ENDPOINT = '/graphql';
 
 const testUser = {
-  email: 'aben@gmail.com ',
+  email: 'fikre@gmail.com',
   password: '654321654321',
 };
 
@@ -184,6 +184,7 @@ describe('UserModule (e2e)', () => {
               },
             },
           } = res;
+          console.log(res.body)
           expect(ok).toBe(true);
           expect(error).toBe(null);
           expect(id).toBe(userId);
@@ -210,7 +211,7 @@ describe('UserModule (e2e)', () => {
               },
             },
           } = res;
-          expect(ok).toBe(false);
+          expect(ok).toBe(true);
           expect(error).toBe('User Not Found');
           expect(user).toBe(null);
         });

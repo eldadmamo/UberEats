@@ -11,12 +11,6 @@ export class UserProfileInput {
 
 @ObjectType()
 export class UserProfileOutput extends CoreOutput{
-    @Field(() => Boolean)
-    ok: boolean;
-
-    @Field(() => String, { nullable: true })
-    error?: string;
-
     @Field(() => User, {nullable: true})
     user?: User;
 }
