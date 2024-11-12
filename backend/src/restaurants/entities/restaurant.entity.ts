@@ -1,29 +1,68 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql";
-import { IsBoolean, IsInt, IsOptional, IsString, Length } from "class-validator";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { IsString, Length } from "class-validator";
+import { CoreEntity } from "src/common/entities/core.entity";
+import { Column, Entity, ManyToOne, OneToMany, RelationId } from "typeorm";
+import { User } from "src/users/entities/user.entity";
+import { Category } from "./category.entity";
+import { Order } from "src/orders/entites/order.entity";
+import { Dish } from "./dish.entity";
 
-@InputType({ isAbstract:true })
+
+@InputType('RestaurantInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
-export class Restaurant {
-     @PrimaryGeneratedColumn()
-     @Field(() => Number)
-     id: number
+export class Restaurant extends CoreEntity {
 
-     @Field(() => String)
-     @Column()
-     @IsString()
-     @Length(5)
-     name: string;  
+    @Field(type => String)
+    @Column()
+    @IsString()
+    @Length(5)
+    name: string
 
-     @Field(() => Boolean, {nullable: true, defaultValue:true})
-     @Column({default:true})
-     @IsOptional()
-     @IsBoolean()
-     isVegan: Boolean 
-     
-     @Field(type => String,{defaultValue:"Ethiopia"})
-     @Column()
-     @IsString()
-     address: string
+    @Field(type => String)
+    @Column()
+    @IsString()
+    coverImg: string
+
+    @Field(type => String)
+    @Column()
+    @IsString()
+    address: string
+
+    
+    @Field(type => Category, { nullable: true })
+    @ManyToOne(type => Category, category => category.restaurants, { nullable: true, onDelete: 'SET NULL', eager: true })
+    category: Category
+
+    @Column()
+    categoryId: number
+
+    
+    @Field(type => User)
+    @ManyToOne(type => User, user => user.restaurants, { onDelete: 'CASCADE' })
+    owner: User
+
+    //restaurant may have many orders
+    @Field(type => [Order])
+    @OneToMany(type => Order, order => order.restaurant)
+    orders: Order[]
+
+    //preload relation but only load user Id instead of whole user object
+    @RelationId((restaurant: Restaurant) => restaurant.owner)
+    ownerId: number
+
+    @Field(type => [Dish], { nullable: true })
+    @OneToMany(
+        type => Dish,
+        dish => dish.restaurant,
+    )
+    menu: Dish[]
+
+    @Field(type => Boolean)
+    @Column({ default: false })
+    isPromoted: boolean
+
+    @Field(type => Date, { nullable: true })
+    @Column({ nullable: true })
+    promotedUntil: Date
 }

@@ -300,7 +300,7 @@ describe('UserService', () => {
       verificationsRepository.findOne.mockRejectedValue(new Error());
       const result = await service.verifyEmail('');
       expect(result.ok).toBe(false);
-      expect(result.error).toBeDefined(); // checks for any error message
+      expect(result.error).toBeDefined(); 
     });    
   });
 });

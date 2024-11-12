@@ -21,19 +21,6 @@ export class UserService {
         private readonly mailService: MailService
     ) { }
 
-    /* 
-    Create Account (takes createAccountInput(dto) as input)
-    returns Object(boolean,string-errormsg) for mutation output
-    **check @Mutation in users.resolver**
-
-    1. check if new User exists in db
-    2.1. if user exists
-    -> return error
-    2.2 if user does not exist (isNew)
-    -> create user & hash the password
-    -> add verification, send verification email
-    -> return ok
-    */
 
     async createAccount({ email, password, role }: CreateAccountInput): Promise<CreateAccountOutput> {
         try {
@@ -52,14 +39,6 @@ export class UserService {
         }
     }
 
-    /*
-    Login (takes loginInput(dto))
-    returns Object(ok,error,token) for mutation output
-
-    1. find User with provided email
-    2. check if the password matches (hash provided and compare with hashed in DB)
-    3. make a JWT token and give to User
-    */
 
     async login({ email, password }: LoginInput): Promise<LoginOutput> {
         try {
@@ -90,10 +69,6 @@ export class UserService {
         }
     }
 
-    /*
-   findById (takes id of user)
-   returns Object(ok,error,token) for mutation output
-   */
 
     async findById(id: number): Promise<UserProfileOutput> {
         try {
@@ -146,12 +121,6 @@ export class UserService {
 
     }
 
-    /*
-    verifyEmail
-    takes verification code(string) and returns boolean
-    have to explicitly tell typeOrm to load the relationship
-    should not save() as User has beforeupdate() that hashes pw
-    */
     async verifyEmail(code: string): Promise<VerifyEmailOutput> {
         try {
             const verification = await this.verifications.findOne({ where: { code }, relations: ['user'] })

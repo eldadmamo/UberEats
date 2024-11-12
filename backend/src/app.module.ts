@@ -3,18 +3,26 @@ import * as Joi from "joi"
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
-
-import { Restaurant } from './restaurants/entities/restaurant.entity';
-
+import { Category } from './restaurants/entities/category.entity';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { AuthModule } from './auth/auth.module';
+import { Dish } from './restaurants/entities/dish.entity';
+import { OrdersModule } from './orders/orders.module';
+import { CommonModule } from './common/common.module';
+import { UploadsModule } from './uploads/uploads.module';
 import { Verification } from './users/entities/verification.entity';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { Order } from './orders/entites/order.entity';
+import { OrderItem } from './orders/entites/order-item.entity';
+import { Payment } from './payments/entites/payment.entity';
 import { MailModule } from './mail/mail.module';
-
+import { ScheduleModule } from '@nestjs/schedule';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -33,6 +41,8 @@ import { MailModule } from './mail/mail.module';
         MAILGUN_API_KEY: Joi.string().required(),
         MAILGUN_DOMAIN_NAME: Joi.string().required(),
         MAILGUN_FROM_EMAIL: Joi.string().required(),
+        AWS_KEY: Joi.string().required(), 
+        AWS_SECRET_KEY: Joi.string().required()
       })
     }),
     TypeOrmModule.forRoot({
@@ -44,12 +54,13 @@ import { MailModule } from './mail/mail.module';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== "prod",
       logging: process.env.NODE_ENV !== "prod" && process.env.NODE_ENV !== 'test',
-      entities: [User, Verification, Restaurant],
+      namingStrategy: new SnakeNamingStrategy(),
+      entities: [User, Verification, Restaurant, Category, Dish, Order, OrderItem, Payment],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-      //https://docs.nestjs.com/graphql/subscriptions
+    
       subscriptions: {
         'subscriptions-transport-ws': {
           onConnect: (connectionParams: any) => {
@@ -64,7 +75,7 @@ import { MailModule } from './mail/mail.module';
         }
       },
     }),
-    
+    ScheduleModule.forRoot(),
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY
     }),
@@ -76,17 +87,13 @@ import { MailModule } from './mail/mail.module';
     UsersModule,
     RestaurantsModule,
     AuthModule,
+    OrdersModule,
+    CommonModule,
+    PaymentsModule,
+    UploadsModule
   ],
   controllers: [],
   providers: [],
 })
 
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(JwtMiddleware).forRoutes({
-//       path: "/graphql",
-//       method: RequestMethod.POST
-//     })
-//   }
-// }
 export class AppModule { }
