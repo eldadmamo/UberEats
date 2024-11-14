@@ -28,7 +28,6 @@ export class Restaurant extends CoreEntity {
     @Column()
     @IsString()
     address: string
-
     
     @Field(type => Category, { nullable: true })
     @ManyToOne(type => Category, category => category.restaurants, { nullable: true, onDelete: 'SET NULL', eager: true })
@@ -36,18 +35,15 @@ export class Restaurant extends CoreEntity {
 
     @Column()
     categoryId: number
-
     
     @Field(type => User)
     @ManyToOne(type => User, user => user.restaurants, { onDelete: 'CASCADE' })
     owner: User
 
-    //restaurant may have many orders
     @Field(type => [Order])
     @OneToMany(type => Order, order => order.restaurant)
     orders: Order[]
 
-    //preload relation but only load user Id instead of whole user object
     @RelationId((restaurant: Restaurant) => restaurant.owner)
     ownerId: number
 

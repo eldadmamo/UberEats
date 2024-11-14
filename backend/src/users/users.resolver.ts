@@ -14,7 +14,7 @@ import { Role } from 'src/auth/role.decorator';
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Mutation(returns => CreateAccountOutput)
+  @Mutation(returns => CreateAccountOutput)  
   async createAccount(
     @Args('input') createAccountInput: CreateAccountInput,
   ): Promise<CreateAccountOutput> {

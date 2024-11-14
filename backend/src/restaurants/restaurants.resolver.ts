@@ -35,7 +35,6 @@ export class RestaurantResolver {
         @Args('input') createRestaurantInput: CreatesRestaurantInput): Promise<CreatesRestaurantOutput> {
         return this.restaurantService.createRestaurant(authUser, createRestaurantInput)
     }
-
     
     @Mutation(returns => EditRestaurantOutput)
     @Role(['Owner'])
@@ -89,7 +88,6 @@ export class RestaurantResolver {
 export class CategoryResolver {
     constructor(private readonly restaurantService: RestaurantService) { }
 
-    
     @ResolveField(type => Int)
     restaurantCount(@Parent() category: Category): Promise<number> {
         return this.restaurantService.countRestaurants(category)

@@ -6,10 +6,9 @@ import { CoreOutput } from "src/common/dtos/output.dto";
 
 @InputType()
 export class EditRestaurantInput extends PartialType(CreatesRestaurantInput) {
-    
     @Field(type => Number)
     restaurantId:number
 }
 
 @ObjectType()
-export class EditRestaurantOutput extends CoreOutput { }
+export class EditRestaurantOutput extends CoreOutput {}

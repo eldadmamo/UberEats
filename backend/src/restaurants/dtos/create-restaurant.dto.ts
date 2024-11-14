@@ -8,7 +8,6 @@ export class CreatesRestaurantInput extends PickType(Restaurant, [
     'coverImg',
     'address'
 ]) {
-    //create a slug to narrow down the category input
     @Field(type => String)
     categoryName: string
 }
