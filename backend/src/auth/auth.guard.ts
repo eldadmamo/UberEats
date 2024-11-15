@@ -22,6 +22,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     const gqlContext = GqlExecutionContext.create(context).getContext();
+    console.log(gqlContext.token);
     const token = gqlContext.token
     if (token) {
       const decoded = this.jwtService.verify(token.toString())
@@ -34,7 +35,7 @@ export class AuthGuard implements CanActivate {
         if (roles.includes('Any')) {
           return true;
         }
-        
+
         return roles.includes(user.role);
       } else {
         return false

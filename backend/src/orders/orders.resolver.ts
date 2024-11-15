@@ -44,9 +44,7 @@ export class OrderResolver {
         return this.ordersService.editOrder(user, editOrderInput)
     }
 
-    //Owner Dashboard show pending orders
-    //triggered by customer (trigger string saved in constants)
-    //when customer adds new order, this subscription is triggered
+    
     @Subscription(returns => Order, {
         //check if restaurant of the order is owned by the listener
         filter: ({ pendingOrders: { ownerId } }, _, { user }) => {
@@ -73,7 +71,7 @@ export class OrderResolver {
             if (order.driverId !== user.id && order.customerId !== user.id && order.restaurant.ownerId !== user.id) {
                 return false
             }
-            return order.id === input.id
+            return order.id === input.id 
         }
     })
     @Role(['Any'])

@@ -41,8 +41,6 @@ import { PaymentsModule } from './payments/payments.module';
         MAILGUN_API_KEY: Joi.string().required(),
         MAILGUN_DOMAIN_NAME: Joi.string().required(),
         MAILGUN_FROM_EMAIL: Joi.string().required(),
-        AWS_KEY: Joi.string().required(), 
-        AWS_SECRET_KEY: Joi.string().required()
       })
     }),
     TypeOrmModule.forRoot({
@@ -96,4 +94,4 @@ import { PaymentsModule } from './payments/payments.module';
   providers: [],
 })
 
-export class AppModule { }
+export class AppModule {}
